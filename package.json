@@ -1,2 +1,15 @@
-npm init -y
-npm install express
+{
+  "name": "signal-service-lab",
+  "version": "1.0.0",
+  "description": "Minimal node service for CI/CD lab",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo Build completed successfully"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
