@@ -1,45 +1,27 @@
-name: node-ci-cd
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  build:
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install deps
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Package artifact
-        run: |
-          tar --exclude='./node_modules' \
-              --exclude='./.git' \
-              --exclude='./.github' \
-              -czf signal-service-${{ github.sha }}.tar.gz \
-              package.json \
-              server.js
-
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ap-south-1
 
-      - name: Upload artifact to S3
+      - name: Deploy Intel via SSM
         run: |
-          aws s3 cp signal-service-${{ github.sha }}.tar.gz \
-          s3://${{ secrets.S3_BUCKET }}/
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Name,Values=intel-app" \
+            --parameters commands="cd /opt/signal-service && ./deploy.sh ${{ github.sha }}" \
+            --comment "Deploy signal-service Intel"
+
+      - name: Deploy ARM via SSM
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Name,Values=arm-app" \
+            --parameters commands="cd /opt/signal-service && ./deploy.sh ${{ github.sha }}" \
+            --comment "Deploy signal-service ARM"
