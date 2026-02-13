@@ -1,44 +1,59 @@
-name: node-ci-cd
+name: build-multi-arch
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build:
+
+  build-x86:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install deps
-        run: npm install
+      - run: npm install
+      - run: npm run build
 
-      - name: Build
-        run: npm run build
-
-      - name: Package artifact
+      - name: Package x86 artifact
         run: |
           tar --exclude='./node_modules' \
               --exclude='./.git' \
               --exclude='./.github' \
-              -czf signal-service-${{ github.sha }}.tar.gz \
-              package.json \
-              server.js
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+              -czf signal-service_x86_${{ github.sha }}.tar.gz \
+              package.json server.js
 
-      - name: Upload artifact to S3
+      - name: Upload x86 artifact to S3
         run: |
-          aws s3 cp signal-service-${{ github.sha }}.tar.gz \
-          s3://${{ secrets.S3_BUCKET }}/
+          aws s3 cp signal-service_x86_${{ github.sha }}.tar.gz \
+          s3://${{ secrets.S3_BUCKET }}/x86/
+
+  build-arm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+      - run: npm run build
+
+      - name: Package ARM artifact
+        run: |
+          tar --exclude='./node_modules' \
+              --exclude='./.git' \
+              --exclude='./.github' \
+              -czf signal-service_arm64_${{ github.sha }}.tar.gz \
+              package.json server.js
+
+      - name: Upload ARM artifact to S3
+        run: |
+          aws s3 cp signal-service_arm64_${{ github.sha }}.tar.gz \
+          s3://${{ secrets.S3_BUCKET }}/arm64/
