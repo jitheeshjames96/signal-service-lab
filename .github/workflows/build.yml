@@ -25,7 +25,12 @@ jobs:
 
       - name: Package artifact
         run: |
-          tar -czf signal-service-${{ github.sha }}.tar.gz .
+          tar --exclude='./node_modules' \
+              --exclude='./.git' \
+              --exclude='./.github' \
+              -czf signal-service-${{ github.sha }}.tar.gz \
+              package.json \
+              server.js
 
       - name: Upload artifact to GitHub
         uses: actions/upload-artifact@v4
