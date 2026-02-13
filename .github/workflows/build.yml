@@ -1,4 +1,4 @@
-name: node-ci-runner-build
+name: node-ci-artifact
 
 on:
   push:
@@ -17,8 +17,18 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies in runner
+      - name: Install dependencies
         run: npm install
 
-      - name: Run build in runner
+      - name: Run build
         run: npm run build
+
+      - name: Package artifact
+        run: |
+          tar -czf signal-service-${{ github.sha }}.tar.gz .
+
+      - name: Upload artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-service
+          path: signal-service-${{ github.sha }}.tar.gz
