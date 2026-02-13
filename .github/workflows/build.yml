@@ -35,11 +35,11 @@ jobs:
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: AKIA33VMBE6ZCG2T2UC7
+          aws-secret-access-key: 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
           aws-region: ap-south-1
 
       - name: Upload artifact to S3
         run: |
           aws s3 cp signal-service-${{ github.sha }}.tar.gz \
-          s3://${{ secrets.S3_BUCKET }}/
+          s3://signal-service-artifacts/
