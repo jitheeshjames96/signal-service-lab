@@ -1,0 +1,8 @@
+{
+  "name": "ui-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "mkdir -p build && cp index.html build/",
+    "start": "npx serve build"
+  }
+}
